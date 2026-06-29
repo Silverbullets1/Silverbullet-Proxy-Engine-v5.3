@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silverbullet Proxy Engine v6.0</title>
+    <title>Silverbullet Proxy Engine v7.0</title>
     <style>
         :root {
             --bg-color: #030508;
@@ -121,7 +121,7 @@
             letter-spacing: 1px;
         }
 
-        select, button {
+        select, button, input[type="text"] {
             width: 100%;
             background-color: #05070a;
             border: 1px solid var(--border-color);
@@ -130,12 +130,16 @@
             border-radius: 4px;
             font-size: 0.9rem;
             outline: none;
-            cursor: pointer;
             transition: all 0.2s ease;
         }
 
-        select:focus {
+        button {
+            cursor: pointer;
+        }
+
+        select:focus, input[type="text"]:focus {
             border-color: var(--accent-color);
+            box-shadow: 0 0 8px rgba(0, 255, 102, 0.2);
         }
 
         .btn-primary {
@@ -170,6 +174,25 @@
             box-shadow: none !important;
         }
 
+        .progress-wrapper {
+            width: 100%;
+            background: #05070a;
+            border: 1px solid var(--border-color);
+            height: 6px;
+            border-radius: 3px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--accent-color);
+            box-shadow: 0 0 8px var(--accent-color);
+            transition: width 0.1s linear;
+        }
+
         .status-bar {
             display: flex;
             justify-content: space-between;
@@ -189,6 +212,16 @@
             font-weight: bold;
             margin-left: 3px;
             margin-right: 8px;
+        }
+
+        .search-container {
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .search-container input {
+            color: var(--accent-color);
+            border-color: rgba(0, 255, 102, 0.3);
         }
 
         textarea {
@@ -228,7 +261,7 @@
 
 <div class="container">
     <div class="header">
-        <h1>Silverbullet Proxy Engine <span>v6.0</span></h1>
+        <h1>Silverbullet Proxy Engine <span>v7.0</span></h1>
         <p>Live Multi-API Aggregator // Fastly CDN Architecture</p>
         <div class="dev-tag">developed by : <a href="https://t.me/Silverbullets_bot" target="_blank">@Silverbullets_bot</a></div>
     </div>
@@ -241,7 +274,7 @@
                 <option value="http">HTTP / HTTPS</option>
                 <option value="socks4">SOCKS4</option>
                 <option value="socks5">SOCKS5</option>
-                <option value="mtproto">MTPROTO (Telegram DPI-Bypass)</option>
+                <option value="mtproto">MTPROTO (Standard)</option>
                 <option value="v2ray">VLESS / VMESS / TROJAN</option>
             </select>
         </div>
@@ -249,6 +282,10 @@
             <button id="resetBtn" class="btn-danger" onclick="resetEngine()">RESET</button>
             <button id="scrapeBtn" class="btn-primary" onclick="startScrape()">EXECUTE AUDIT</button>
         </div>
+    </div>
+
+    <div class="progress-wrapper" id="progressWrapper">
+        <div class="progress-bar" id="progressBar"></div>
     </div>
 
     <div class="status-bar">
@@ -263,6 +300,11 @@
         </div>
     </div>
 
+    <div class="search-container" id="searchContainer">
+        <label for="searchInput">Real-time Database Filter</label>
+        <input type="text" id="searchInput" oninput="filterDatabase()" placeholder="Type to filter output (e.g., :8080, vmess, 192.168)...">
+    </div>
+
     <textarea id="outputDisplay" readonly placeholder="[ Console output idle. Ready to extract live daily proxies... ]"></textarea>
 
     <div class="action-buttons">
@@ -273,7 +315,6 @@
 </div>
 
 <script>
-    // Upgraded high-yield sources targeting fastly jsdelivr CDN bypasses
     const sources = {
         http: [
             'https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all',
@@ -282,7 +323,9 @@
             'https://fastly.jsdelivr.net/gh/monosans/proxy-list@main/proxies/http.txt',
             'https://fastly.jsdelivr.net/gh/roosterkid/openproxylist@main/HTTPS_RAW.txt',
             'https://fastly.jsdelivr.net/gh/prxchk/proxy-list@main/http.txt',
-            'https://fastly.jsdelivr.net/gh/Zaeem20/FREE_PROXIES_LIST@master/http.txt'
+            'https://fastly.jsdelivr.net/gh/Zaeem20/FREE_PROXIES_LIST@master/http.txt',
+            'https://fastly.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/http/data.txt',
+            'https://fastly.jsdelivr.net/gh/VPSLabCloud/VPSLab-Free-Proxy-List@main/http_all.txt'
         ],
         socks4: [
             'https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks4&timeout=10000&country=all',
@@ -291,7 +334,9 @@
             'https://fastly.jsdelivr.net/gh/monosans/proxy-list@main/proxies/socks4.txt',
             'https://fastly.jsdelivr.net/gh/roosterkid/openproxylist@main/SOCKS4_RAW.txt',
             'https://fastly.jsdelivr.net/gh/prxchk/proxy-list@main/socks4.txt',
-            'https://fastly.jsdelivr.net/gh/Zaeem20/FREE_PROXIES_LIST@master/socks4.txt'
+            'https://fastly.jsdelivr.net/gh/Zaeem20/FREE_PROXIES_LIST@master/socks4.txt',
+            'https://fastly.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks4/data.txt',
+            'https://fastly.jsdelivr.net/gh/VPSLabCloud/VPSLab-Free-Proxy-List@main/socks4_all.txt'
         ],
         socks5: [
             'https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks5&timeout=10000&country=all',
@@ -300,7 +345,9 @@
             'https://fastly.jsdelivr.net/gh/monosans/proxy-list@main/proxies/socks5.txt',
             'https://fastly.jsdelivr.net/gh/roosterkid/openproxylist@main/SOCKS5_RAW.txt',
             'https://fastly.jsdelivr.net/gh/prxchk/proxy-list@main/socks5.txt',
-            'https://fastly.jsdelivr.net/gh/Zaeem20/FREE_PROXIES_LIST@master/socks5.txt'
+            'https://fastly.jsdelivr.net/gh/Zaeem20/FREE_PROXIES_LIST@master/socks5.txt',
+            'https://fastly.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks5/data.txt',
+            'https://fastly.jsdelivr.net/gh/VPSLabCloud/VPSLab-Free-Proxy-List@main/socks5_all.txt'
         ],
         mtproto: [
             'https://fastly.jsdelivr.net/gh/yebekhe/MTProtoCollector@main/proxy/mtproto.txt',
@@ -308,14 +355,24 @@
             'https://fastly.jsdelivr.net/gh/mishakorzik/Free-Proxies@main/mtproto.txt',
             'https://fastly.jsdelivr.net/gh/ALIILAPRO/MTProtoProxy@main/mtproto.txt',
             'https://fastly.jsdelivr.net/gh/ts-sf/mtproto-proxy-list@main/mtproto.txt',
-            'https://fastly.jsdelivr.net/gh/SlavaBaturin/telegram-mtproto-proxies@master/proxies.txt'
+            'https://fastly.jsdelivr.net/gh/SlavaBaturin/telegram-mtproto-proxies@master/proxies.txt',
+            'https://fastly.jsdelivr.net/gh/whoahaow/rjsxrd@main/MTProto.txt',
+            'https://fastly.jsdelivr.net/gh/MustafaBaqer/VestraNet-Nodes@main/protocols/mtproto.txt',
+            'https://fastly.jsdelivr.net/gh/Leon406/Sub@master/sub/share/mtp',
+            'https://fastly.jsdelivr.net/gh/Bardiafa/Free-V2ray-Config@main/Splitted-By-Protocol/mtproto.txt',
+            'https://fastly.jsdelivr.net/gh/tbbatbb/Proxy@master/dist/mtproto.txt',
+            'https://fastly.jsdelivr.net/gh/peasoft/NoMoreWalls@master/list_mtproto.txt'
         ],
         v2ray: [
             'https://fastly.jsdelivr.net/gh/barry-jelly/Free_Proxy_Daily@master/V2Ray/v2ray.txt',
             'https://fastly.jsdelivr.net/gh/Pawdroid/Free-servers@main/sub',
             'https://fastly.jsdelivr.net/gh/mahdibland/ShadowsocksAggregator@master/Eternity',
             'https://fastly.jsdelivr.net/gh/Leon406/Sub@master/sub/share/v2',
-            'https://fastly.jsdelivr.net/gh/mfuu/v2ray@master/v2ray'
+            'https://fastly.jsdelivr.net/gh/mfuu/v2ray@master/v2ray',
+            'https://fastly.jsdelivr.net/gh/MatinGhanbari/v2ray-configs@main/subscriptions/v2ray/all_sub.txt',
+            'https://fastly.jsdelivr.net/gh/Au1rxx/free-vpn-subscriptions@main/output/v2ray-base64.txt',
+            'https://fastly.jsdelivr.net/gh/sevcator/5ubscrpt10n@main/protocols/vl.txt',
+            'https://fastly.jsdelivr.net/gh/yitong2333/proxy-minging@main/v2ray.txt'
         ]
     };
 
@@ -331,6 +388,10 @@
         globalProxyList = [];
         document.getElementById('outputDisplay').value = '';
         document.getElementById('statusText').innerText = 'System status: Memory flushed. Ready.';
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchContainer').style.display = 'none';
+        document.getElementById('progressWrapper').style.display = 'none';
+        document.getElementById('progressBar').style.width = '0%';
         
         ['http', 'socks4', 'socks5', 'mtproto', 'v2ray'].forEach(type => {
             document.getElementById(`c-${type}`).innerText = '0';
@@ -348,19 +409,21 @@
         const scrapeBtn = document.getElementById('scrapeBtn');
         const outputDisplay = document.getElementById('outputDisplay');
         const statusText = document.getElementById('statusText');
+        const progressWrapper = document.getElementById('progressWrapper');
+        const progressBar = document.getElementById('progressBar');
         
-        // Lock controls during execution
         scrapeBtn.disabled = true;
         document.getElementById('copyBtn').disabled = true;
         document.getElementById('downloadBtn').disabled = true;
         document.getElementById('downloadJsonBtn').disabled = true;
+        document.getElementById('searchContainer').style.display = 'none';
+        document.getElementById('searchInput').value = '';
         
         outputDisplay.value = '';
-        statusText.innerText = 'Status: Querying open network nodes...';
+        statusText.innerText = 'Status: Launching query handshake across cluster nodes...';
         
         let counts = { http: 0, socks4: 0, socks5: 0, mtproto: 0, v2ray: 0 };
         
-        // Clear display counters
         ['http', 'socks4', 'socks5', 'mtproto', 'v2ray'].forEach(cat => {
             document.getElementById(`c-${cat}`).innerText = '0';
         });
@@ -369,6 +432,13 @@
         let targetCategories = type === 'all' ? ['http', 'socks4', 'socks5', 'mtproto', 'v2ray'] : [type];
         let masterSet = new Set();
         let fetchPromises = [];
+
+        let totalSources = 0;
+        targetCategories.forEach(cat => totalSources += sources[cat].length);
+        let completedSources = 0;
+
+        progressWrapper.style.display = 'block';
+        progressBar.style.width = '0%';
 
         for (let category of targetCategories) {
             for (let url of sources[category]) {
@@ -392,7 +462,8 @@
                                     let server = match[1];
                                     let port = match[2];
                                     let secret = match[3];
-                                    if (secret.length > 15) {
+                                    
+                                    if (secret.length >= 32 && secret.length <= 34 && !secret.toLowerCase().startsWith('ee')) {
                                         matches.push(`tg://proxy?server=${server}&port=${port}&secret=${secret}`);
                                     }
                                 }
@@ -407,7 +478,6 @@
                                 const ipRegex = /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]{1,5}\b/g;
                                 const rawMatches = text.match(ipRegex) || [];
                                 
-                                // Validate IP bounds (0-255) and Port bounds (1-65535)
                                 matches = rawMatches.filter(ipStr => {
                                     const [ip, port] = ipStr.split(':');
                                     const parts = ip.split('.').map(Number);
@@ -415,7 +485,6 @@
                                 });
                             }
                             
-                            // Live Update Stream: Populates numbers as data streams in
                             if (matches.length > 0) {
                                 matches.forEach(proxy => {
                                     if (!masterSet.has(proxy)) {
@@ -424,22 +493,24 @@
                                     }
                                 });
                                 
-                                // Thread-safe atomic update to DOM layout
                                 document.getElementById(`c-${category}`).innerText = counts[category];
                                 document.getElementById('proxyCount').innerText = masterSet.size;
                             }
                         } catch (err) {
                             clearTimeout(timeoutId);
+                        } finally {
+                            completedSources++;
+                            let progressPercentage = (completedSources / totalSources) * 100;
+                            progressBar.style.width = `${progressPercentage}%`;
+                            statusText.innerText = `Extracting endpoints: ${completedSources} / ${totalSources} logs structuralized...`;
                         }
                     })()
                 );
             }
         }
 
-        // Await all concurrent operations to terminate
         await Promise.all(fetchPromises);
 
-        // Sort parsed endpoints logically
         let rawArray = Array.from(masterSet);
         rawArray.sort((a, b) => {
             const ipA = a.match(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/);
@@ -456,28 +527,45 @@
         });
         
         globalProxyList = rawArray;
-
-        // Re-enable scrape button so users can run it again without hard-resetting
-        scrapeBtn.disabled = false; 
+        scrapeBtn.disabled = false;
+        setTimeout(() => { progressWrapper.style.display = 'none'; }, 500);
 
         if (globalProxyList.length > 0) {
-            appendToConsole(globalProxyList.join('\n'));
-            statusText.innerText = 'Status: Extraction and auto-sort complete.';
+            outputDisplay.value = globalProxyList.join('\n');
+            statusText.innerText = 'Status: Extraction complete. Live matrix deployed.';
+            document.getElementById('searchContainer').style.display = 'block';
             document.getElementById('copyBtn').disabled = false;
             document.getElementById('downloadBtn').disabled = false;
             document.getElementById('downloadJsonBtn').disabled = false;
         } else {
-            appendToConsole('\n[!] CRITICAL: Complete handshake timeout across targets. Telecom Firewall active.');
-            statusText.innerText = 'Status: Critical Failure';
+            appendToConsole('\n[!] NO PROXIES FOUND. Target lists completely unreachable.');
+            statusText.innerText = 'Status: Critical API handshake failure.';
         }
     }
 
+    function filterDatabase() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        const display = document.getElementById('outputDisplay');
+        
+        if (!query) {
+            display.value = globalProxyList.join('\n');
+            document.getElementById('proxyCount').innerText = globalProxyList.length;
+            return;
+        }
+        
+        const filteredList = globalProxyList.filter(proxy => proxy.toLowerCase().includes(query));
+        display.value = filteredList.length > 0 ? filteredList.join('\n') : '[ No runtime matching items detected inside local buffer stack ]';
+        document.getElementById('proxyCount').innerText = filteredList.length;
+    }
+
     function copyToClipboard() {
-        const text = globalProxyList.join('\n');
-        if (!text) return;
+        const display = document.getElementById('outputDisplay');
+        const text = display.value;
+        if (!text || text.startsWith('[ No runtime')) return;
+        
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(() => {
-                alert(`Success: ${globalProxyList.length} structured proxies loaded into clipboard.`);
+                alert(`Success: Proxies loaded into operating system clipboard.`);
             }).catch(() => { runFallbackCopy(text); });
         } else { runFallbackCopy(text); }
     }
@@ -492,16 +580,25 @@
         dummyArea.select();
         try {
             document.execCommand('copy');
-            alert(`Success: ${globalProxyList.length} structured proxies loaded via fallback.`);
+            alert(`Success: Proxies loaded via browser core backup hook.`);
         } catch (err) {}
         document.body.removeChild(dummyArea);
     }
 
-    function downloadTXT() { triggerDownload(new Blob([globalProxyList.join('\n')], { type: 'text/plain;charset=utf-8' }), '.txt'); }
-    function downloadJSON() { triggerDownload(new Blob([JSON.stringify(globalProxyList, null, 2)], { type: 'application/json;charset=utf-8' }), '.json'); }
+    function downloadTXT() { 
+        const currentText = document.getElementById('outputDisplay').value;
+        if(!currentText || currentText.startsWith('[ No runtime')) return;
+        triggerDownload(new Blob([currentText], { type: 'text/plain;charset=utf-8' }), '.txt'); 
+    }
+    
+    function downloadJSON() { 
+        const currentText = document.getElementById('outputDisplay').value;
+        if(!currentText || currentText.startsWith('[ No runtime')) return;
+        const currentArray = currentText.split('\n');
+        triggerDownload(new Blob([JSON.stringify(currentArray, null, 2)], { type: 'application/json;charset=utf-8' }), '.json'); 
+    }
 
     function triggerDownload(blob, extension) {
-        if (globalProxyList.length === 0) return;
         const anchor = document.createElement('a');
         anchor.download = `Silverbullet_Proxies_${new Date().toISOString().slice(0, 10)}${extension}`;
         anchor.href = window.URL.createObjectURL(blob);
