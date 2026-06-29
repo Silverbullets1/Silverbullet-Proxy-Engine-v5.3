@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silverbullet Proxy Engine v5.8</title>
+    <title>Silverbullet Proxy Engine v6.0</title>
     <style>
         :root {
             --bg-color: #030508;
@@ -228,8 +228,8 @@
 
 <div class="container">
     <div class="header">
-        <h1>Silverbullet Proxy Engine <span>v5.8</span></h1>
-        <p>Live Multi-API Aggregator // DPI-Evasion Parser // Elite Fallback Layer</p>
+        <h1>Silverbullet Proxy Engine <span>v6.0</span></h1>
+        <p>Live Multi-API Aggregator // Fastly CDN Architecture</p>
         <div class="dev-tag">developed by : <a href="https://t.me/Silverbullets_bot" target="_blank">@Silverbullets_bot</a></div>
     </div>
 
@@ -273,44 +273,35 @@
 </div>
 
 <script>
-    // Engineered with GHP.CI Mirrors to bypass ISP network blocking
+    // Completely routed through fastly.jsdelivr to force native CORS and bypass localized network firewalls.
     const sources = {
         http: [
             'https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all',
-            'https://ghp.ci/https://raw.githubusercontent.com/proxygenerator1/ProxyGenerator/main/MostStable/http.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/VPSLabCloud/VPSLab-Free-Proxy-List/main/http_elite.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/Thordata/awesome-free-proxy-list/main/proxies/http.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/ahahaabas/rotating-proxy-list/main/http.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt'
+            'https://fastly.jsdelivr.net/gh/proxygenerator1/ProxyGenerator@main/MostStable/http.txt',
+            'https://fastly.jsdelivr.net/gh/Thordata/awesome-free-proxy-list@main/proxies/http.txt',
+            'https://fastly.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/http.txt'
         ],
         socks4: [
             'https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks4&timeout=10000&country=all',
-            'https://ghp.ci/https://raw.githubusercontent.com/proxygenerator1/ProxyGenerator/main/MostStable/socks4.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/VPSLabCloud/VPSLab-Free-Proxy-List/main/socks4_all.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/Thordata/awesome-free-proxy-list/main/proxies/socks4.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/ahahaabas/rotating-proxy-list/main/socks4.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt'
+            'https://fastly.jsdelivr.net/gh/proxygenerator1/ProxyGenerator@main/MostStable/socks4.txt',
+            'https://fastly.jsdelivr.net/gh/Thordata/awesome-free-proxy-list@main/proxies/socks4.txt',
+            'https://fastly.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/socks4.txt'
         ],
         socks5: [
             'https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks5&timeout=10000&country=all',
-            'https://ghp.ci/https://raw.githubusercontent.com/proxygenerator1/ProxyGenerator/main/MostStable/socks5.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/VPSLabCloud/VPSLab-Free-Proxy-List/main/socks5_all.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/Thordata/awesome-free-proxy-list/main/proxies/socks5.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/ahahaabas/rotating-proxy-list/main/socks5.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt'
+            'https://fastly.jsdelivr.net/gh/proxygenerator1/ProxyGenerator@main/MostStable/socks5.txt',
+            'https://fastly.jsdelivr.net/gh/Thordata/awesome-free-proxy-list@main/proxies/socks5.txt',
+            'https://fastly.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/socks5.txt'
         ],
         mtproto: [
-            'mtpro_xyz_special_trigger', // Deep HTML JSON Extraction target
-            'https://ghp.ci/https://raw.githubusercontent.com/yebekhe/MTProtoCollector/main/proxy/mtproto.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/hookzof/socks5_list/master/tg/mtproto.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/prxchk/proxy-list/main/mtproto.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/mishakorzik/Free-Proxies/main/mtproto.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/ALIILAPRO/MTProtoProxy/main/mtproto.txt'
+            'https://fastly.jsdelivr.net/gh/yebekhe/MTProtoCollector@main/proxy/mtproto.txt',
+            'https://fastly.jsdelivr.net/gh/hookzof/socks5_list@master/tg/mtproto.txt',
+            'https://fastly.jsdelivr.net/gh/mishakorzik/Free-Proxies@main/mtproto.txt',
+            'https://fastly.jsdelivr.net/gh/ALIILAPRO/MTProtoProxy@main/mtproto.txt'
         ],
         v2ray: [
-            'https://ghp.ci/https://raw.githubusercontent.com/barry-jelly/Free_Proxy_Daily/master/V2Ray/v2ray.txt',
-            'https://ghp.ci/https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub',
-            'https://ghp.ci/https://raw.githubusercontent.com/freefq/free/master/v2'
+            'https://fastly.jsdelivr.net/gh/barry-jelly/Free_Proxy_Daily@master/V2Ray/v2ray.txt',
+            'https://fastly.jsdelivr.net/gh/Pawdroid/Free-servers@main/sub'
         ]
     };
 
@@ -350,8 +341,8 @@
         document.getElementById('downloadJsonBtn').disabled = true;
         
         outputDisplay.value = '';
-        appendToConsole('[*] Initializing secure parallel data streams (Anti-Blocker Engine)...\n');
-        statusText.innerText = 'Status: Ripping proxies and bypassing ISP firewalls...';
+        appendToConsole('[*] Initializing secure parallel data streams (Direct Mode)...\n');
+        statusText.innerText = 'Status: Querying open network nodes via Fastly CDN...';
         
         let counts = { http: 0, socks4: 0, socks5: 0, mtproto: 0, v2ray: 0 };
         document.getElementById('c-http').innerText = '0';
@@ -367,59 +358,22 @@
 
         for (let category of targetCategories) {
             for (let url of sources[category]) {
-                let sourceName = url.includes('proxyscrape') ? 'ProxyScrape' : 
-                                 url === 'mtpro_xyz_special_trigger' ? 'MTPro.XYZ (Elite)' : 'GHP.CI Mirror';
+                let sourceName = url.includes('proxyscrape') ? 'ProxyScrape' : 'Fastly CDN Mirror';
                 
                 fetchPromises.push(
                     (async () => {
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 12000);
+                        const timeoutId = setTimeout(() => controller.abort(), 8000);
                         
                         try {
-                            let text = "";
-                            let success = false;
-
-                            if (url === 'mtpro_xyz_special_trigger') {
-                                // Specialized JSON Extractor Loop to rip MTPro.XYZ bypassing Cloudflare
-                                const mtproEndpoints = [
-                                    `https://api.allorigins.win/get?url=${encodeURIComponent('https://mtpro.xyz')}`,
-                                    `https://api.codetabs.com/v1/proxy?quest=https://mtpro.xyz`,
-                                    `https://corsproxy.io/?https://mtpro.xyz`
-                                ];
-                                
-                                for (let ep of mtproEndpoints) {
-                                    try {
-                                        const response = await fetch(ep, { signal: controller.signal });
-                                        if (response.ok) {
-                                            if (ep.includes('allorigins.win/get')) {
-                                                const json = await response.json();
-                                                text = json.contents;
-                                            } else {
-                                                text = await response.text();
-                                            }
-                                            success = true;
-                                            break; 
-                                        }
-                                    } catch (e) {
-                                        continue; 
-                                    }
-                                }
-                            } else {
-                                // Standard Fetch mapped through GHP.CI to defeat Indian ISP blacklists
-                                const response = await fetch(url, { signal: controller.signal });
-                                if (response.ok) {
-                                    text = await response.text();
-                                    success = true;
-                                }
-                            }
-
+                            const response = await fetch(url, { signal: controller.signal });
                             clearTimeout(timeoutId);
-                            if (!success) throw new Error('Cloudflare/ISP Barrier Blocked');
+                            if (!response.ok) throw new Error('Network Refusal');
                             
+                            const text = await response.text();
                             let matches = [];
                             
                             if (category === 'mtproto') {
-                                // Advanced Regex that extracts tg://proxy data directly out of raw HTML tables
                                 const mtpRegex = /(?:https:\/\/t\.me\/proxy\?|tg:\/\/proxy\?)?server=([a-zA-Z0-9.-]+)&port=(\d+)&secret=([a-zA-Z0-9_\-%=]+)/gi;
                                 let match;
                                 while ((match = mtpRegex.exec(text)) !== null) {
@@ -445,7 +399,7 @@
                             return { category, sourceName, matches, status: 'success' };
                         } catch (err) {
                             clearTimeout(timeoutId);
-                            let reason = err.name === 'AbortError' ? 'timeout (12s)' : 'offline';
+                            let reason = err.name === 'AbortError' ? 'timeout' : 'offline';
                             return { category, sourceName, matches: [], status: 'error', reason };
                         }
                     })()
