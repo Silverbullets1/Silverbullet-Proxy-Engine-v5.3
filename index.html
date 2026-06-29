@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silverbullet Proxy Engine v5.7 (Deep Research Ed.)</title>
+    <title>Silverbullet Proxy Engine v5.8 (CORS Relay Ed.)</title>
     <style>
         :root {
             --bg-color: #030508;
@@ -228,8 +228,8 @@
 
 <div class="container">
     <div class="header">
-        <h1>Silverbullet Proxy Engine <span>v5.7</span></h1>
-        <p>Live Multi-API Aggregator // DPI-Evasion Parser // Strict Auto-Sorting</p>
+        <h1>Silverbullet Proxy Engine <span>v5.8</span></h1>
+        <p>Live Multi-API Aggregator // DPI-Evasion Parser // CORS Proxy Relay</p>
         <div class="dev-tag">developed by : <a href="https://t.me/Silverbullets_bot" target="_blank">@Silverbullets_bot</a></div>
     </div>
 
@@ -348,8 +348,8 @@
         document.getElementById('downloadJsonBtn').disabled = true;
         
         outputDisplay.value = '';
-        appendToConsole('[*] Initializing secure parallel data streams...\n');
-        statusText.innerText = 'Status: Querying open network nodes (Parallel Mode)...';
+        appendToConsole('[*] Initializing secure parallel data streams (CORS Active)...\n');
+        statusText.innerText = 'Status: Querying open network nodes via CORS Relay...';
         
         let counts = { http: 0, socks4: 0, socks5: 0, mtproto: 0, v2ray: 0 };
         document.getElementById('c-http').innerText = '0';
@@ -370,9 +370,18 @@
                 fetchPromises.push(
                     (async () => {
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 6000);
+                        // Increased timeout slightly to account for the CORS relay jump
+                        const timeoutId = setTimeout(() => controller.abort(), 8000);
+                        
                         try {
-                            const response = await fetch(url, { signal: controller.signal });
+                            // --- V5.8 SMART CORS BRIDGE ---
+                            // If it's a GitHub raw link, we route it through AllOrigins to prevent Vercel/Browser blocks
+                            let fetchUrl = url;
+                            if (url.includes('raw.githubusercontent.com')) {
+                                fetchUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+                            }
+
+                            const response = await fetch(fetchUrl, { signal: controller.signal });
                             clearTimeout(timeoutId);
                             if (!response.ok) throw new Error('Network Refusal');
                             
@@ -392,7 +401,6 @@
                                 }
                             } else if (category === 'v2ray') {
                                 let decodedText = text;
-                                // Deep Research Parse: Base64 Auto-Decode for subscription endpoints
                                 if (/^[a-zA-Z0-9+/=\s\n\r]+$/.test(text.trim()) && text.trim().length > 100) {
                                     try { decodedText = atob(text.trim().replace(/\s/g, '')); } catch(e) {}
                                 }
@@ -406,7 +414,7 @@
                             return { category, sourceName, matches, status: 'success' };
                         } catch (err) {
                             clearTimeout(timeoutId);
-                            let reason = err.name === 'AbortError' ? 'timeout (6s)' : 'offline';
+                            let reason = err.name === 'AbortError' ? 'timeout (8s)' : 'offline';
                             return { category, sourceName, matches: [], status: 'error', reason };
                         }
                     })()
@@ -451,7 +459,6 @@
              appendToConsole(`\n[*] MTProto Cryptography Analysis: Found ${tlsCount} Fake-TLS (Highest Security) & ${padCount} Random Padding (High Security) configs.\n`);
         }
 
-        // Deep Research Parse: Bulletproof Dynamic Auto-Sorter
         let rawArray = Array.from(masterSet);
         rawArray.sort((a, b) => {
             const ipA = a.match(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/);
