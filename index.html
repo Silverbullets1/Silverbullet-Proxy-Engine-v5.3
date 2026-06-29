@@ -273,7 +273,6 @@
 </div>
 
 <script>
-    // Completely routed through fastly.jsdelivr to force native CORS and bypass localized network firewalls.
     const sources = {
         http: [
             'https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all',
@@ -341,8 +340,7 @@
         document.getElementById('downloadJsonBtn').disabled = true;
         
         outputDisplay.value = '';
-        appendToConsole('[*] Initializing secure parallel data streams (Direct Mode)...\n');
-        statusText.innerText = 'Status: Querying open network nodes via Fastly CDN...';
+        statusText.innerText = 'Status: Querying open network nodes...';
         
         let counts = { http: 0, socks4: 0, socks5: 0, mtproto: 0, v2ray: 0 };
         document.getElementById('c-http').innerText = '0';
@@ -358,8 +356,6 @@
 
         for (let category of targetCategories) {
             for (let url of sources[category]) {
-                let sourceName = url.includes('proxyscrape') ? 'ProxyScrape' : 'Fastly CDN Mirror';
-                
                 fetchPromises.push(
                     (async () => {
                         const controller = new AbortController();
@@ -396,11 +392,10 @@
                                 matches = text.match(ipRegex) || [];
                             }
                             
-                            return { category, sourceName, matches, status: 'success' };
+                            return { category, matches, status: 'success' };
                         } catch (err) {
                             clearTimeout(timeoutId);
-                            let reason = err.name === 'AbortError' ? 'timeout' : 'offline';
-                            return { category, sourceName, matches: [], status: 'error', reason };
+                            return { category, matches: [], status: 'error' };
                         }
                     })()
                 );
@@ -408,41 +403,19 @@
         }
 
         const results = await Promise.all(fetchPromises);
-        let tlsCount = 0; 
-        let padCount = 0; 
 
         results.forEach(res => {
-            if (res.status === 'success') {
-                appendToConsole(`[+] Syncing ${res.category.toUpperCase()} from [${res.sourceName}]...\n`);
-                if (res.matches.length > 0) {
-                    let addedThisRound = 0;
-                    res.matches.forEach(proxy => {
-                        if (!masterSet.has(proxy)) {
-                            masterSet.add(proxy);
-                            counts[res.category]++;
-                            addedThisRound++;
-                            
-                            if (res.category === 'mtproto') {
-                                if (proxy.includes('&secret=ee') || proxy.includes('&secret=EE')) tlsCount++;
-                                else if (proxy.includes('&secret=dd') || proxy.includes('&secret=DD')) padCount++;
-                            }
-                        }
-                    });
-                    appendToConsole(`    -> Parsed ${addedThisRound} unique nodes.\n`);
-                } else {
-                    appendToConsole(`    -> Clear response, no pairs found.\n`);
-                }
-            } else {
-                appendToConsole(`[-] Node skip: [${res.sourceName}] ${res.reason}.\n`);
+            if (res.status === 'success' && res.matches.length > 0) {
+                res.matches.forEach(proxy => {
+                    if (!masterSet.has(proxy)) {
+                        masterSet.add(proxy);
+                        counts[res.category]++;
+                    }
+                });
             }
-            
             document.getElementById(`c-${res.category}`).innerText = counts[res.category];
             document.getElementById('proxyCount').innerText = masterSet.size;
         });
-
-        if (counts.mtproto > 0) {
-             appendToConsole(`\n[*] MTProto Cryptography Analysis: Found ${tlsCount} Fake-TLS (Highest Security) & ${padCount} Random Padding (High Security) configs.\n`);
-        }
 
         let rawArray = Array.from(masterSet);
         rawArray.sort((a, b) => {
@@ -462,7 +435,6 @@
         globalProxyList = rawArray;
 
         if (globalProxyList.length > 0) {
-            appendToConsole('\n[*] DEPLOYMENT COMPLETE. SORTING & RENDERING MASTER LIST...\n\n');
             appendToConsole(globalProxyList.join('\n'));
             statusText.innerText = 'Status: Extraction and auto-sort complete.';
             document.getElementById('copyBtn').disabled = false;
