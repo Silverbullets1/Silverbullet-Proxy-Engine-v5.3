@@ -273,34 +273,49 @@
 </div>
 
 <script>
+    // Upgraded high-yield sources targeting fastly jsdelivr CDN bypasses
     const sources = {
         http: [
             'https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all',
             'https://fastly.jsdelivr.net/gh/proxygenerator1/ProxyGenerator@main/MostStable/http.txt',
-            'https://fastly.jsdelivr.net/gh/Thordata/awesome-free-proxy-list@main/proxies/http.txt',
-            'https://fastly.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/http.txt'
+            'https://fastly.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/http.txt',
+            'https://fastly.jsdelivr.net/gh/monosans/proxy-list@main/proxies/http.txt',
+            'https://fastly.jsdelivr.net/gh/roosterkid/openproxylist@main/HTTPS_RAW.txt',
+            'https://fastly.jsdelivr.net/gh/prxchk/proxy-list@main/http.txt',
+            'https://fastly.jsdelivr.net/gh/Zaeem20/FREE_PROXIES_LIST@master/http.txt'
         ],
         socks4: [
             'https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks4&timeout=10000&country=all',
             'https://fastly.jsdelivr.net/gh/proxygenerator1/ProxyGenerator@main/MostStable/socks4.txt',
-            'https://fastly.jsdelivr.net/gh/Thordata/awesome-free-proxy-list@main/proxies/socks4.txt',
-            'https://fastly.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/socks4.txt'
+            'https://fastly.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/socks4.txt',
+            'https://fastly.jsdelivr.net/gh/monosans/proxy-list@main/proxies/socks4.txt',
+            'https://fastly.jsdelivr.net/gh/roosterkid/openproxylist@main/SOCKS4_RAW.txt',
+            'https://fastly.jsdelivr.net/gh/prxchk/proxy-list@main/socks4.txt',
+            'https://fastly.jsdelivr.net/gh/Zaeem20/FREE_PROXIES_LIST@master/socks4.txt'
         ],
         socks5: [
             'https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks5&timeout=10000&country=all',
             'https://fastly.jsdelivr.net/gh/proxygenerator1/ProxyGenerator@main/MostStable/socks5.txt',
-            'https://fastly.jsdelivr.net/gh/Thordata/awesome-free-proxy-list@main/proxies/socks5.txt',
-            'https://fastly.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/socks5.txt'
+            'https://fastly.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/socks5.txt',
+            'https://fastly.jsdelivr.net/gh/monosans/proxy-list@main/proxies/socks5.txt',
+            'https://fastly.jsdelivr.net/gh/roosterkid/openproxylist@main/SOCKS5_RAW.txt',
+            'https://fastly.jsdelivr.net/gh/prxchk/proxy-list@main/socks5.txt',
+            'https://fastly.jsdelivr.net/gh/Zaeem20/FREE_PROXIES_LIST@master/socks5.txt'
         ],
         mtproto: [
             'https://fastly.jsdelivr.net/gh/yebekhe/MTProtoCollector@main/proxy/mtproto.txt',
             'https://fastly.jsdelivr.net/gh/hookzof/socks5_list@master/tg/mtproto.txt',
             'https://fastly.jsdelivr.net/gh/mishakorzik/Free-Proxies@main/mtproto.txt',
-            'https://fastly.jsdelivr.net/gh/ALIILAPRO/MTProtoProxy@main/mtproto.txt'
+            'https://fastly.jsdelivr.net/gh/ALIILAPRO/MTProtoProxy@main/mtproto.txt',
+            'https://fastly.jsdelivr.net/gh/ts-sf/mtproto-proxy-list@main/mtproto.txt',
+            'https://fastly.jsdelivr.net/gh/SlavaBaturin/telegram-mtproto-proxies@master/proxies.txt'
         ],
         v2ray: [
             'https://fastly.jsdelivr.net/gh/barry-jelly/Free_Proxy_Daily@master/V2Ray/v2ray.txt',
-            'https://fastly.jsdelivr.net/gh/Pawdroid/Free-servers@main/sub'
+            'https://fastly.jsdelivr.net/gh/Pawdroid/Free-servers@main/sub',
+            'https://fastly.jsdelivr.net/gh/mahdibland/ShadowsocksAggregator@master/Eternity',
+            'https://fastly.jsdelivr.net/gh/Leon406/Sub@master/sub/share/v2',
+            'https://fastly.jsdelivr.net/gh/mfuu/v2ray@master/v2ray'
         ]
     };
 
@@ -334,6 +349,7 @@
         const outputDisplay = document.getElementById('outputDisplay');
         const statusText = document.getElementById('statusText');
         
+        // Lock controls during execution
         scrapeBtn.disabled = true;
         document.getElementById('copyBtn').disabled = true;
         document.getElementById('downloadBtn').disabled = true;
@@ -343,11 +359,11 @@
         statusText.innerText = 'Status: Querying open network nodes...';
         
         let counts = { http: 0, socks4: 0, socks5: 0, mtproto: 0, v2ray: 0 };
-        document.getElementById('c-http').innerText = '0';
-        document.getElementById('c-socks4').innerText = '0';
-        document.getElementById('c-socks5').innerText = '0';
-        document.getElementById('c-mtproto').innerText = '0';
-        document.getElementById('c-v2ray').innerText = '0';
+        
+        // Clear display counters
+        ['http', 'socks4', 'socks5', 'mtproto', 'v2ray'].forEach(cat => {
+            document.getElementById(`c-${cat}`).innerText = '0';
+        });
         document.getElementById('proxyCount').innerText = '0';
 
         let targetCategories = type === 'all' ? ['http', 'socks4', 'socks5', 'mtproto', 'v2ray'] : [type];
@@ -389,34 +405,41 @@
                                 matches = decodedText.match(v2Regex) || [];
                             } else {
                                 const ipRegex = /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]{1,5}\b/g;
-                                matches = text.match(ipRegex) || [];
+                                const rawMatches = text.match(ipRegex) || [];
+                                
+                                // Validate IP bounds (0-255) and Port bounds (1-65535)
+                                matches = rawMatches.filter(ipStr => {
+                                    const [ip, port] = ipStr.split(':');
+                                    const parts = ip.split('.').map(Number);
+                                    return parts.every(p => p <= 255) && Number(port) <= 65535;
+                                });
                             }
                             
-                            return { category, matches, status: 'success' };
+                            // Live Update Stream: Populates numbers as data streams in
+                            if (matches.length > 0) {
+                                matches.forEach(proxy => {
+                                    if (!masterSet.has(proxy)) {
+                                        masterSet.add(proxy);
+                                        counts[category]++;
+                                    }
+                                });
+                                
+                                // Thread-safe atomic update to DOM layout
+                                document.getElementById(`c-${category}`).innerText = counts[category];
+                                document.getElementById('proxyCount').innerText = masterSet.size;
+                            }
                         } catch (err) {
                             clearTimeout(timeoutId);
-                            return { category, matches: [], status: 'error' };
                         }
                     })()
                 );
             }
         }
 
-        const results = await Promise.all(fetchPromises);
+        // Await all concurrent operations to terminate
+        await Promise.all(fetchPromises);
 
-        results.forEach(res => {
-            if (res.status === 'success' && res.matches.length > 0) {
-                res.matches.forEach(proxy => {
-                    if (!masterSet.has(proxy)) {
-                        masterSet.add(proxy);
-                        counts[res.category]++;
-                    }
-                });
-            }
-            document.getElementById(`c-${res.category}`).innerText = counts[res.category];
-            document.getElementById('proxyCount').innerText = masterSet.size;
-        });
-
+        // Sort parsed endpoints logically
         let rawArray = Array.from(masterSet);
         rawArray.sort((a, b) => {
             const ipA = a.match(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/);
@@ -434,6 +457,9 @@
         
         globalProxyList = rawArray;
 
+        // Re-enable scrape button so users can run it again without hard-resetting
+        scrapeBtn.disabled = false; 
+
         if (globalProxyList.length > 0) {
             appendToConsole(globalProxyList.join('\n'));
             statusText.innerText = 'Status: Extraction and auto-sort complete.';
@@ -443,7 +469,6 @@
         } else {
             appendToConsole('\n[!] CRITICAL: Complete handshake timeout across targets. Telecom Firewall active.');
             statusText.innerText = 'Status: Critical Failure';
-            scrapeBtn.disabled = false;
         }
     }
 
