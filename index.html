@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silverbullet Proxy Engine v5.3</title>
+    <title>Silverbullet Proxy Engine v5.6 (Deep Research Ed.)</title>
     <style>
         :root {
             --bg-color: #030508;
@@ -143,7 +143,6 @@
             border-color: var(--accent-color);
             color: var(--accent-color);
             font-weight: bold;
-            letter-spacing: 1px;
         }
 
         .btn-primary:hover:not(:disabled) {
@@ -157,7 +156,6 @@
             border-color: var(--danger-color);
             color: var(--danger-color);
             font-weight: bold;
-            letter-spacing: 1px;
         }
 
         .btn-danger:hover:not(:disabled) {
@@ -207,11 +205,6 @@
             outline: none;
         }
 
-        textarea:focus {
-            border-color: rgba(0, 255, 102, 0.4);
-            box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.05);
-        }
-
         .action-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -235,8 +228,8 @@
 
 <div class="container">
     <div class="header">
-        <h1>Silverbullet Proxy Engine <span>v5.3</span></h1>
-        <p>Live Multi-API Aggregator // Strict Auto-Sorting // Anti-Freeze</p>
+        <h1>Silverbullet Proxy Engine <span>v5.6</span></h1>
+        <p>Live Multi-API Aggregator // DPI-Evasion Parser // Strict Auto-Sorting</p>
         <div class="dev-tag">developed by : <a href="https://t.me/Silverbullets_bot" target="_blank">@Silverbullets_bot</a></div>
     </div>
 
@@ -248,6 +241,8 @@
                 <option value="http">HTTP / HTTPS</option>
                 <option value="socks4">SOCKS4</option>
                 <option value="socks5">SOCKS5</option>
+                <option value="mtproto">MTPROTO (Telegram DPI-Bypass)</option>
+                <option value="v2ray">VLESS / VMESS / TROJAN</option>
             </select>
         </div>
         <div style="display: flex; align-items: flex-end; gap: 10px;">
@@ -261,7 +256,9 @@
         <div class="status-stats">
             [ HTTP:<span id="c-http">0</span> 
               S4:<span id="c-socks4">0</span> 
-              S5:<span id="c-socks5">0</span> ] 
+              S5:<span id="c-socks5">0</span> 
+              MTP:<span id="c-mtproto">0</span> 
+              V2R:<span id="c-v2ray">0</span> ] 
             TOTAL:<span id="proxyCount" style="font-size: 1.1em;">0</span>
         </div>
     </div>
@@ -276,36 +273,35 @@
 </div>
 
 <script>
-    // Upgraded Supercharged Sources Dictionary
     const sources = {
         http: [
             'https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all',
-            'https://cdn.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/http.txt',
-            'https://cdn.jsdelivr.net/gh/monosans/proxy-list@main/proxies/http.txt',
-            'https://raw.githubusercontent.com/prxchk/proxy-list/main/http.txt',
-            'https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-http.txt',
-            'https://raw.githubusercontent.com/roosterkid/openproxylist/main/HTTPS_RAW.txt',
-            'https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/http.txt',
-            'https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/https.txt'
+            'https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt',
+            'https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/http.txt',
+            'https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/http.txt'
         ],
         socks4: [
             'https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks4&timeout=10000&country=all',
-            'https://cdn.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/socks4.txt',
-            'https://cdn.jsdelivr.net/gh/monosans/proxy-list@main/proxies/socks4.txt',
-            'https://raw.githubusercontent.com/prxchk/proxy-list/main/socks4.txt',
-            'https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks4.txt',
-            'https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS4_RAW.txt',
-            'https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/socks4.txt'
+            'https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt',
+            'https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks4.txt'
         ],
         socks5: [
             'https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks5&timeout=10000&country=all',
-            'https://cdn.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/socks5.txt',
-            'https://cdn.jsdelivr.net/gh/monosans/proxy-list@main/proxies/socks5.txt',
-            'https://cdn.jsdelivr.net/gh/hookzof/socks5_list@master/proxy.txt',
-            'https://raw.githubusercontent.com/prxchk/proxy-list/main/socks5.txt',
-            'https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks5.txt',
-            'https://raw.githubusercontent.com/roosterkid/openproxylist/main/SOCKS5_RAW.txt',
-            'https://raw.githubusercontent.com/ShiftyTR/Proxy-List/master/socks5.txt'
+            'https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt',
+            'https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt'
+        ],
+        mtproto: [
+            'https://raw.githubusercontent.com/SoliSpirit/mtproto/master/all_proxies.txt',
+            'https://raw.githubusercontent.com/Grim1313/mtproto-for-telegram/master/all_proxies.txt',
+            'https://raw.githubusercontent.com/ALIILAPRO/MTProtoProxy/main/mtproto.txt',
+            'https://raw.githubusercontent.com/Argh94/Proxy-List/main/MTProto.txt',
+            'https://raw.githubusercontent.com/V2RAYCONFIGSPOOL/TELEGRAM_PROXY_SUB/main/Telegram.txt',
+            'https://raw.githubusercontent.com/hookzof/socks5_list/master/tg/mtproto.txt'
+        ],
+        v2ray: [
+            'https://raw.githubusercontent.com/barry-jelly/Free_Proxy_Daily/master/V2Ray/v2ray.txt',
+            'https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub',
+            'https://raw.githubusercontent.com/freefq/free/master/v2'
         ]
     };
 
@@ -322,7 +318,7 @@
         document.getElementById('outputDisplay').value = '';
         document.getElementById('statusText').innerText = 'System status: Memory flushed. Ready.';
         
-        ['http', 'socks4', 'socks5'].forEach(type => {
+        ['http', 'socks4', 'socks5', 'mtproto', 'v2ray'].forEach(type => {
             document.getElementById(`c-${type}`).innerText = '0';
         });
         document.getElementById('proxyCount').innerText = '0';
@@ -348,42 +344,62 @@
         appendToConsole('[*] Initializing secure parallel data streams...\n');
         statusText.innerText = 'Status: Querying open network nodes (Parallel Mode)...';
         
-        let counts = { http: 0, socks4: 0, socks5: 0 };
+        let counts = { http: 0, socks4: 0, socks5: 0, mtproto: 0, v2ray: 0 };
         document.getElementById('c-http').innerText = '0';
         document.getElementById('c-socks4').innerText = '0';
         document.getElementById('c-socks5').innerText = '0';
+        document.getElementById('c-mtproto').innerText = '0';
+        document.getElementById('c-v2ray').innerText = '0';
         document.getElementById('proxyCount').innerText = '0';
 
-        let targetCategories = type === 'all' ? ['http', 'socks4', 'socks5'] : [type];
+        let targetCategories = type === 'all' ? ['http', 'socks4', 'socks5', 'mtproto', 'v2ray'] : [type];
         let masterSet = new Set();
-        
-        const ipRegex = /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]{1,5}\b/g;
-        
-        // True Parallel Processing logic
         let fetchPromises = [];
 
         for (let category of targetCategories) {
             for (let url of sources[category]) {
                 let sourceName = url.includes('proxyscrape') ? 'ProxyScrape' : 'Global CDN Mirror';
                 
-                // Push an async function to our promise array
                 fetchPromises.push(
                     (async () => {
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 5000);
+                        const timeoutId = setTimeout(() => controller.abort(), 6000);
                         try {
                             const response = await fetch(url, { signal: controller.signal });
                             clearTimeout(timeoutId);
-                            
                             if (!response.ok) throw new Error('Network Refusal');
                             
                             const text = await response.text();
-                            const matches = text.match(ipRegex) || [];
+                            let matches = [];
+                            
+                            if (category === 'mtproto') {
+                                const mtpRegex = /(?:https:\/\/t\.me\/proxy\?|tg:\/\/proxy\?)?server=([a-zA-Z0-9.-]+)&port=(\d+)&secret=([a-zA-Z0-9_\-%=]+)/gi;
+                                let match;
+                                while ((match = mtpRegex.exec(text)) !== null) {
+                                    let server = match[1];
+                                    let port = match[2];
+                                    let secret = match[3];
+                                    if (secret.length > 15) {
+                                        matches.push(`tg://proxy?server=${server}&port=${port}&secret=${secret}`);
+                                    }
+                                }
+                            } else if (category === 'v2ray') {
+                                let decodedText = text;
+                                // Deep Research Parse: Base64 Auto-Decode for subscription endpoints
+                                if (/^[a-zA-Z0-9+/=\s\n\r]+$/.test(text.trim()) && text.trim().length > 100) {
+                                    try { decodedText = atob(text.trim().replace(/\s/g, '')); } catch(e) {}
+                                }
+                                const v2Regex = /(?:vmess|vless|trojan|ss):\/\/[a-zA-Z0-9._~:/?#@!$&'()*+,;=%-]+/g;
+                                matches = decodedText.match(v2Regex) || [];
+                            } else {
+                                const ipRegex = /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]{1,5}\b/g;
+                                matches = text.match(ipRegex) || [];
+                            }
                             
                             return { category, sourceName, matches, status: 'success' };
                         } catch (err) {
                             clearTimeout(timeoutId);
-                            let reason = err.name === 'AbortError' ? 'timeout (5s)' : 'offline';
+                            let reason = err.name === 'AbortError' ? 'timeout (6s)' : 'offline';
                             return { category, sourceName, matches: [], status: 'error', reason };
                         }
                     })()
@@ -391,10 +407,10 @@
             }
         }
 
-        // Await all fetch operations simultaneously 
         const results = await Promise.all(fetchPromises);
+        let tlsCount = 0; 
+        let padCount = 0; 
 
-        // Process results synchronously to update UI and master pool safely
         results.forEach(res => {
             if (res.status === 'success') {
                 appendToConsole(`[+] Syncing ${res.category.toUpperCase()} from [${res.sourceName}]...\n`);
@@ -405,6 +421,11 @@
                             masterSet.add(proxy);
                             counts[res.category]++;
                             addedThisRound++;
+                            
+                            if (res.category === 'mtproto') {
+                                if (proxy.includes('&secret=ee') || proxy.includes('&secret=EE')) tlsCount++;
+                                else if (proxy.includes('&secret=dd') || proxy.includes('&secret=DD')) padCount++;
+                            }
                         }
                     });
                     appendToConsole(`    -> Parsed ${addedThisRound} unique nodes.\n`);
@@ -415,22 +436,28 @@
                 appendToConsole(`[-] Node skip: [${res.sourceName}] ${res.reason}.\n`);
             }
             
-            // Live Update UI Counters
             document.getElementById(`c-${res.category}`).innerText = counts[res.category];
             document.getElementById('proxyCount').innerText = masterSet.size;
         });
 
-        // Strict Numerical IP Sorting Logic
+        if (counts.mtproto > 0) {
+             appendToConsole(`\n[*] MTProto Cryptography Analysis: Found ${tlsCount} Fake-TLS (Highest Security) & ${padCount} Random Padding (High Security) configs.\n`);
+        }
+
+        // Deep Research Parse: Bulletproof Dynamic Auto-Sorter
         let rawArray = Array.from(masterSet);
         rawArray.sort((a, b) => {
-            const numA = a.split(':')[0].split('.').map(Number);
-            const numB = b.split(':')[0].split('.').map(Number);
-            for (let i = 0; i < 4; i++) {
-                if (numA[i] !== numB[i]) {
-                    return numA[i] - numB[i];
+            const ipA = a.match(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/);
+            const ipB = b.match(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/);
+            if (ipA && ipB) {
+                const numA = ipA[0].split('.').map(Number);
+                const numB = ipB[0].split('.').map(Number);
+                for (let i = 0; i < 4; i++) {
+                    if (numA[i] !== numB[i]) return numA[i] - numB[i];
                 }
+                return 0;
             }
-            return 0;
+            return a.localeCompare(b);
         });
         
         globalProxyList = rawArray;
@@ -438,7 +465,6 @@
         if (globalProxyList.length > 0) {
             appendToConsole('\n[*] DEPLOYMENT COMPLETE. SORTING & RENDERING MASTER LIST...\n\n');
             appendToConsole(globalProxyList.join('\n'));
-            
             statusText.innerText = 'Status: Extraction and auto-sort complete.';
             document.getElementById('copyBtn').disabled = false;
             document.getElementById('downloadBtn').disabled = false;
@@ -453,16 +479,11 @@
     function copyToClipboard() {
         const text = globalProxyList.join('\n');
         if (!text) return;
-
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text).then(() => {
                 alert(`Success: ${globalProxyList.length} structured proxies loaded into clipboard.`);
-            }).catch(() => {
-                runFallbackCopy(text);
-            });
-        } else {
-            runFallbackCopy(text);
-        }
+            }).catch(() => { runFallbackCopy(text); });
+        } else { runFallbackCopy(text); }
     }
 
     function runFallbackCopy(text) {
@@ -475,42 +496,23 @@
         dummyArea.select();
         try {
             document.execCommand('copy');
-            alert(`Success: ${globalProxyList.length} structured proxies loaded via core fallback layer.`);
-        } catch (err) {
-            alert('Security constraint prevented automated copying. Please manually select the text.');
-        }
+            alert(`Success: ${globalProxyList.length} structured proxies loaded via fallback.`);
+        } catch (err) {}
         document.body.removeChild(dummyArea);
     }
 
-    function downloadTXT() {
-        const text = globalProxyList.join('\n');
-        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-        triggerDownload(blob, '.txt');
-    }
-
-    function downloadJSON() {
-        const jsonText = JSON.stringify(globalProxyList, null, 2);
-        const blob = new Blob([jsonText], { type: 'application/json;charset=utf-8' });
-        triggerDownload(blob, '.json');
-    }
+    function downloadTXT() { triggerDownload(new Blob([globalProxyList.join('\n')], { type: 'text/plain;charset=utf-8' }), '.txt'); }
+    function downloadJSON() { triggerDownload(new Blob([JSON.stringify(globalProxyList, null, 2)], { type: 'application/json;charset=utf-8' }), '.json'); }
 
     function triggerDownload(blob, extension) {
         if (globalProxyList.length === 0) return;
-        
         const anchor = document.createElement('a');
-        const date = new Date().toISOString().slice(0, 10);
-        
-        anchor.download = `Silverbullet_Proxies_${date}${extension}`;
+        anchor.download = `Silverbullet_Proxies_${new Date().toISOString().slice(0, 10)}${extension}`;
         anchor.href = window.URL.createObjectURL(blob);
         anchor.style.display = 'none';
-        
         document.body.appendChild(anchor);
         anchor.click();
-        
-        setTimeout(() => {
-            document.body.removeChild(anchor);
-            window.URL.revokeObjectURL(anchor.href);
-        }, 100);
+        setTimeout(() => { document.body.removeChild(anchor); window.URL.revokeObjectURL(anchor.href); }, 100);
     }
 </script>
 
