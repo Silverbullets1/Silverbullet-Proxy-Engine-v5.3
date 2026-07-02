@@ -128,7 +128,6 @@ function parseText(text, category) {
 
 // --- VERCEL SERVERLESS HANDLER ---
 module.exports = async (req, res) => {
-    // Only allow POST requests
     if (req.method !== 'POST') {
         return res.status(405).send('Method Not Allowed');
     }
@@ -140,7 +139,8 @@ module.exports = async (req, res) => {
         const options = { '1': Object.keys(SOURCES), '2': ['http'], '3': ['socks4'], '4': ['socks5'], '5': ['mtproto'], '6': ['v2ray'], 'all': Object.keys(SOURCES), 'http': ['http'], 'socks4': ['socks4'], 'socks5': ['socks5'], 'mtproto': ['mtproto'], 'v2ray': ['v2ray'] };
         const targets = options[params.choice] || Object.keys(SOURCES);
         
-        let masterSet = new Set();
+        // Memory Map to remember original protocol categories
+        let proxyMemoryMap = new Map();
         const breakdownCounts = { http: 0, socks4: 0, socks5: 0, mtproto: 0, v2ray: 0 };
         const fetchPromises = [];
 
@@ -150,9 +150,8 @@ module.exports = async (req, res) => {
                     const html = await fetchUrl(url);
                     const proxies = parseText(html, cat);
                     for (const p of proxies) {
-                        if (!masterSet.has(p)) {
-                            masterSet.add(p);
-                            breakdownCounts[cat]++;
+                        if (!proxyMemoryMap.has(p)) {
+                            proxyMemoryMap.set(p, cat);
                         }
                     }
                 })());
@@ -160,7 +159,7 @@ module.exports = async (req, res) => {
         }
         
         await Promise.all(fetchPromises);
-        let rawArray = Array.from(masterSet);
+        let rawArray = Array.from(proxyMemoryMap.keys());
 
         // Structural Verification Sweep
         if (params.runChecker && rawArray.length > 0) {
@@ -169,11 +168,12 @@ module.exports = async (req, res) => {
                 const port = proxy.split(':')[1];
                 return port && !isNaN(port) && parseInt(port) > 0;
             });
+            
+            // Recount accurately using the saved memory map
             for (let k in breakdownCounts) breakdownCounts[k] = 0;
             for (const p of rawArray) {
-                if (p.includes('tg://')) breakdownCounts['mtproto']++;
-                else if (p.includes('://')) breakdownCounts['v2ray']++;
-                else breakdownCounts['http']++;
+                const originalCategory = proxyMemoryMap.get(p);
+                if (originalCategory) breakdownCounts[originalCategory]++;
             }
         }
 
