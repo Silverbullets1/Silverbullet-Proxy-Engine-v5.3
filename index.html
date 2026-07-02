@@ -43,6 +43,12 @@
             100% { background-position: 40px 40px; }
         }
 
+        @keyframes pulse-neon {
+            0% { box-shadow: 0 0 4px var(--accent-dim); }
+            50% { box-shadow: 0 0 12px var(--accent-color), inset 0 0 4px var(--accent-dim); }
+            100% { box-shadow: 0 0 4px var(--accent-dim); }
+        }
+
         .container {
             width: 100%;
             max-width: 750px;
@@ -80,6 +86,8 @@
             font-size: 0.85rem;
             color: #8b949e;
             margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .dev-tag {
@@ -175,12 +183,14 @@
             border-color: var(--accent-color);
             color: var(--accent-color);
             font-weight: bold;
+            animation: pulse-neon 2s infinite;
         }
 
         .btn-primary:hover:not(:disabled) {
             background-color: var(--accent-color);
             color: var(--bg-color);
-            box-shadow: 0 0 15px var(--accent-color);
+            box-shadow: 0 0 20px var(--accent-color);
+            animation: none;
         }
 
         .btn-danger {
@@ -200,6 +210,7 @@
             opacity: 0.4;
             cursor: not-allowed;
             box-shadow: none !important;
+            animation: none !important;
         }
 
         .progress-wrapper {
@@ -305,7 +316,7 @@
 <div class="container">
     <div class="header">
         <h1>Silverbullet Proxy Engine <span>v10.0</span></h1>
-        <p>Vercel Serverless API Engine // Fastly CDN Architecture</p>
+        <p>Distributed Cloud API Engine // Fastly CDN Architecture</p>
         <div class="dev-tag">developed by : <a href="https://t.me/Silverbullets_bot" target="_blank">@Silverbullets_bot</a></div>
     </div>
 
@@ -323,13 +334,13 @@
         </div>
         <div style="display: flex; align-items: flex-end; gap: 10px;">
             <button id="resetBtn" class="btn-danger" onclick="resetEngine()">RESET</button>
-            <button id="scrapeBtn" class="btn-primary" onclick="startScrape()">EXECUTE AUDIT</button>
+            <button id="scrapeBtn" class="btn-primary" onclick="startScrape()">INITIATE NODE EXTRACTION</button>
         </div>
     </div>
 
     <div class="options-row">
         <label class="checkbox-label">
-            <input type="checkbox" id="checkerToggle" checked> Run Deep Structural Verification (Vercel Safe)
+            <input type="checkbox" id="checkerToggle" checked> EXECUTE DEEP-NODE STRUCTURAL VALIDATION
         </label>
     </div>
 
@@ -418,7 +429,7 @@
         document.getElementById('searchContainer').style.display = 'none';
         
         outputDisplay.value = '';
-        statusText.innerText = 'Status: Dispatched request to serverless backend...';
+        statusText.innerText = 'Status: Dispatched request to cloud backend...';
         progressWrapper.style.display = 'block';
         progressBar.style.width = '50%';
 
@@ -429,7 +440,7 @@
                 body: JSON.stringify({ choice: type, runChecker: runChecker })
             });
 
-            if (!response.ok) throw new Error('Vercel API Execution Timeout or Failure');
+            if (!response.ok) throw new Error('Cloud API Execution Timeout or Failure');
             
             const result = await response.json();
             progressBar.style.width = '100%';
@@ -445,7 +456,7 @@
 
             if (globalProxyList.length > 0) {
                 outputDisplay.value = globalProxyList.join('\n');
-                statusText.innerText = `Status: Vercel execution complete (${result.timeTaken}s). Live matrix deployed.`;
+                statusText.innerText = `Status: Cloud execution complete (${result.timeTaken}s). Live matrix deployed.`;
                 document.getElementById('searchContainer').style.display = 'block';
                 document.getElementById('copyBtn').disabled = false;
                 document.getElementById('downloadBtn').disabled = false;
@@ -461,7 +472,7 @@
             statusText.innerText = 'Status: Serverless Function Failed.';
         } finally {
             scrapeBtn.disabled = false;
-            scrapeBtn.innerHTML = 'EXECUTE AUDIT';
+            scrapeBtn.innerHTML = 'INITIATE NODE EXTRACTION';
             setTimeout(() => { progressWrapper.style.display = 'none'; }, 1000);
         }
     }
