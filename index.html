@@ -254,7 +254,7 @@
 
         textarea {
             width: 100%;
-            height: 320px;
+            height: 250px;
             background-color: #020305;
             border: 1px solid var(--border-color);
             color: #39ff14;
@@ -268,7 +268,7 @@
 
         .action-buttons {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
             gap: 10px;
             margin-top: 15px;
         }
@@ -277,14 +277,25 @@
             border-color: #8b949e;
             background-color: #1f2937;
         }
+        
+        .loader {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid var(--bg-color);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         @media (max-width: 550px) {
             .controls {
                 grid-template-columns: 1fr;
             }
-            .options-row {
-                flex-direction: column;
-                gap: 10px;
+            .action-buttons {
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
@@ -294,7 +305,7 @@
 <div class="container">
     <div class="header">
         <h1>Silverbullet Proxy Engine <span>v10.0</span></h1>
-        <p>Live Multi-API Aggregator // Fastly CDN Architecture</p>
+        <p>Vercel Serverless API Engine // Fastly CDN Architecture</p>
         <div class="dev-tag">developed by : <a href="https://t.me/Silverbullets_bot" target="_blank">@Silverbullets_bot</a></div>
     </div>
 
@@ -318,7 +329,7 @@
 
     <div class="options-row">
         <label class="checkbox-label">
-            <input type="checkbox" id="checkerToggle" checked> Run Live Structural Checker
+            <input type="checkbox" id="checkerToggle" checked> Run Deep Structural Verification (Vercel Safe)
         </label>
     </div>
 
@@ -349,101 +360,13 @@
         <button id="copyBtn" class="btn-secondary" onclick="copyToClipboard()" disabled>COPY LIST</button>
         <button id="downloadBtn" class="btn-secondary" onclick="downloadTXT()" disabled>EXPORT .TXT</button>
         <button id="downloadJsonBtn" class="btn-secondary" onclick="downloadJSON()" disabled>EXPORT .JSON</button>
+        <button id="downloadCsvBtn" class="btn-secondary" onclick="downloadCSV()" disabled>EXPORT .CSV</button>
     </div>
 </div>
 
 <script>
-    const sources = {
-        http: [
-            'https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all',
-            'https://fastly.jsdelivr.net/gh/proxygenerator1/ProxyGenerator@main/MostStable/http.txt',
-            'https://fastly.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/http.txt',
-            'https://fastly.jsdelivr.net/gh/monosans/proxy-list@main/proxies/http.txt',
-            'https://fastly.jsdelivr.net/gh/roosterkid/openproxylist@main/HTTPS_RAW.txt',
-            'https://fastly.jsdelivr.net/gh/prxchk/proxy-list@main/http.txt',
-            'https://fastly.jsdelivr.net/gh/Zaeem20/FREE_PROXIES_LIST@master/http.txt',
-            'https://fastly.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/http/data.txt',
-            'https://fastly.jsdelivr.net/gh/VPSLabCloud/VPSLab-Free-Proxy-List@main/http_all.txt'
-        ],
-        socks4: [
-            'https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks4&timeout=10000&country=all',
-            'https://fastly.jsdelivr.net/gh/proxygenerator1/ProxyGenerator@main/MostStable/socks4.txt',
-            'https://fastly.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/socks4.txt',
-            'https://fastly.jsdelivr.net/gh/monosans/proxy-list@main/proxies/socks4.txt',
-            'https://fastly.jsdelivr.net/gh/roosterkid/openproxylist@main/SOCKS4_RAW.txt',
-            'https://fastly.jsdelivr.net/gh/prxchk/proxy-list@main/socks4.txt',
-            'https://fastly.jsdelivr.net/gh/Zaeem20/FREE_PROXIES_LIST@master/socks4.txt',
-            'https://fastly.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks4/data.txt',
-            'https://fastly.jsdelivr.net/gh/VPSLabCloud/VPSLab-Free-Proxy-List@main/socks4_all.txt'
-        ],
-        socks5: [
-            'https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks5&timeout=10000&country=all',
-            'https://fastly.jsdelivr.net/gh/proxygenerator1/ProxyGenerator@main/MostStable/socks5.txt',
-            'https://fastly.jsdelivr.net/gh/TheSpeedX/PROXY-List@master/socks5.txt',
-            'https://fastly.jsdelivr.net/gh/monosans/proxy-list@main/proxies/socks5.txt',
-            'https://fastly.jsdelivr.net/gh/roosterkid/openproxylist@main/SOCKS5_RAW.txt',
-            'https://fastly.jsdelivr.net/gh/prxchk/proxy-list@main/socks5.txt',
-            'https://fastly.jsdelivr.net/gh/Zaeem20/FREE_PROXIES_LIST@master/socks5.txt',
-            'https://fastly.jsdelivr.net/gh/proxifly/free-proxy-list@main/proxies/protocols/socks5/data.txt',
-            'https://fastly.jsdelivr.net/gh/VPSLabCloud/VPSLab-Free-Proxy-List@main/socks5_all.txt'
-        ],
-        mtproto: [
-            'https://fastly.jsdelivr.net/gh/yebekhe/MTProtoCollector@main/proxy/mtproto.txt',
-            'https://fastly.jsdelivr.net/gh/hookzof/socks5_list@master/tg/mtproto.txt',
-            'https://fastly.jsdelivr.net/gh/mishakorzik/Free-Proxies@main/mtproto.txt',
-            'https://fastly.jsdelivr.net/gh/ALIILAPRO/MTProtoProxy@main/mtproto.txt',
-            'https://fastly.jsdelivr.net/gh/ts-sf/mtproto-proxy-list@main/mtproto.txt',
-            'https://fastly.jsdelivr.net/gh/SlavaBaturin/telegram-mtproto-proxies@master/proxies.txt',
-            'https://fastly.jsdelivr.net/gh/whoahaow/rjsxrd@main/MTProto.txt',
-            'https://fastly.jsdelivr.net/gh/MustafaBaqer/VestraNet-Nodes@main/protocols/mtproto.txt',
-            'https://fastly.jsdelivr.net/gh/Leon406/Sub@master/sub/share/mtp',
-            'https://fastly.jsdelivr.net/gh/Bardiafa/Free-V2ray-Config@main/Splitted-By-Protocol/mtproto.txt',
-            'https://fastly.jsdelivr.net/gh/tbbatbb/Proxy@master/dist/mtproto.txt',
-            'https://fastly.jsdelivr.net/gh/peasoft/NoMoreWalls@master/list_mtproto.txt'
-        ],
-        v2ray: [
-            'https://fastly.jsdelivr.net/gh/barry-jelly/Free_Proxy_Daily@master/V2Ray/v2ray.txt',
-            'https://fastly.jsdelivr.net/gh/Pawdroid/Free-servers@main/sub',
-            'https://fastly.jsdelivr.net/gh/mahdibland/ShadowsocksAggregator@master/Eternity',
-            'https://fastly.jsdelivr.net/gh/Leon406/Sub@master/sub/share/v2',
-            'https://fastly.jsdelivr.net/gh/mfuu/v2ray@master/v2ray',
-            'https://fastly.jsdelivr.net/gh/MatinGhanbari/v2ray-configs@main/subscriptions/v2ray/all_sub.txt',
-            'https://fastly.jsdelivr.net/gh/Au1rxx/free-vpn-subscriptions@main/output/v2ray-base64.txt',
-            'https://fastly.jsdelivr.net/gh/sevcator/5ubscrpt10n@main/protocols/vl.txt',
-            'https://fastly.jsdelivr.net/gh/yitong2333/proxy-minging@main/v2ray.txt'
-        ]
-    };
-
     let globalProxyList = [];
 
-    // v10.0 Feature: Strict Bogon & Private Address Isolation Range
-    function isPublicIp(ip) {
-        try {
-            const parts = ip.split('.').map(Number);
-            if (parts.length !== 4 || parts.some(isNaN) || parts.some(p => p < 0 || p > 255)) return false;
-            if ([0, 10, 127].includes(parts[0])) return false;
-            if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return false;
-            if (parts[0] === 192 && parts[1] === 168) return false;
-            if (parts[0] === 169 && parts[1] === 254) return false;
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    // v10.0 Feature: Dynamic Auto-Padding Correction Module
-    function safeB64Decode(data) {
-        data = data.trim().replace(/\s/g, '');
-        let padding = data.length % 4;
-        if (padding) data += '='.repeat(4 - padding);
-        try {
-            return atob(data);
-        } catch (e) {
-            return "";
-        }
-    }
-
-    // v10.0 Feature: Custom Timestamp String Generation Module
     function getTimestamp() {
         const now = new Date();
         const year = now.getFullYear();
@@ -453,12 +376,6 @@
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
         return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
-    }
-
-    function appendToConsole(text) {
-        const display = document.getElementById('outputDisplay');
-        display.value += text;
-        display.scrollTop = display.scrollHeight;
     }
 
     function resetEngine() {
@@ -479,6 +396,7 @@
         document.getElementById('copyBtn').disabled = true;
         document.getElementById('downloadBtn').disabled = true;
         document.getElementById('downloadJsonBtn').disabled = true;
+        document.getElementById('downloadCsvBtn').disabled = true;
     }
 
     async function startScrape() {
@@ -491,145 +409,60 @@
         const runChecker = document.getElementById('checkerToggle').checked;
         
         scrapeBtn.disabled = true;
+        scrapeBtn.innerHTML = '<span class="loader"></span>PROCESSING...';
+        
         document.getElementById('copyBtn').disabled = true;
         document.getElementById('downloadBtn').disabled = true;
         document.getElementById('downloadJsonBtn').disabled = true;
+        document.getElementById('downloadCsvBtn').disabled = true;
         document.getElementById('searchContainer').style.display = 'none';
-        document.getElementById('searchInput').value = '';
         
         outputDisplay.value = '';
-        statusText.innerText = 'Status: Launching query handshake across cluster nodes...';
-        
-        let counts = { http: 0, socks4: 0, socks5: 0, mtproto: 0, v2ray: 0 };
-        
-        ['http', 'socks4', 'socks5', 'mtproto', 'v2ray'].forEach(cat => {
-            document.getElementById(`c-${cat}`).innerText = '0';
-        });
-        document.getElementById('proxyCount').innerText = '0';
-
-        let targetCategories = type === 'all' ? ['http', 'socks4', 'socks5', 'mtproto', 'v2ray'] : [type];
-        let masterSet = new Set();
-        let fetchPromises = [];
-
-        let totalSources = 0;
-        targetCategories.forEach(cat => totalSources += sources[cat].length);
-        let completedSources = 0;
-
+        statusText.innerText = 'Status: Dispatched request to serverless backend...';
         progressWrapper.style.display = 'block';
-        progressBar.style.width = '0%';
+        progressBar.style.width = '50%';
 
-        for (let category of targetCategories) {
-            for (let url of sources[category]) {
-                fetchPromises.push(
-                    (async () => {
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 8000);
-                        
-                        try {
-                            const response = await fetch(url, { signal: controller.signal });
-                            clearTimeout(timeoutId);
-                            if (!response.ok) throw new Error('Network Refusal');
-                            
-                            const text = await response.text();
-                            let matches = [];
-                            
-                            if (category === 'mtproto') {
-                                const mtpRegex = /(?:https:\/\/t\.me\/proxy\?|tg:\/\/proxy\?)?server=([a-zA-Z0-9.-]+)&port=(\d+)&secret=([a-zA-Z0-9_\-%=]+)/gi;
-                                let match;
-                                while ((match = mtpRegex.exec(text)) !== null) {
-                                    let server = match[1];
-                                    let port = match[2];
-                                    let secret = match[3];
-                                    
-                                    if (secret.length >= 32 && secret.length <= 34 && !secret.toLowerCase().startsWith('ee')) {
-                                        matches.push(`tg://proxy?server=${server}&port=${port}&secret=${secret}`);
-                                    }
-                                }
-                            } else if (category === 'v2ray') {
-                                let decodedText = text;
-                                if (/^[a-zA-Z0-9+/=\s\n\r]+$/.test(text.trim()) && text.trim().length > 50) {
-                                    decodedText = safeB64Decode(text);
-                                }
-                                const v2Regex = /(?:vmess|vless|trojan|ss):\/\/[a-zA-Z0-9._~:/?#@!$&'()*+,;=%-]+/g;
-                                matches = decodedText.match(v2Regex) || [];
-                            } else {
-                                const ipRegex = /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}:[0-9]{1,5}\b/g;
-                                const rawMatches = text.match(ipRegex) || [];
-                                
-                                matches = rawMatches.filter(ipStr => {
-                                    const [ip, port] = ipStr.split(':');
-                                    return Number(port) <= 65535 && isPublicIp(ip);
-                                });
-                            }
-                            
-                            if (matches.length > 0) {
-                                matches.forEach(proxy => {
-                                    if (!masterSet.has(proxy)) {
-                                        masterSet.add(proxy);
-                                        counts[category]++;
-                                    }
-                                });
-                                
-                                document.getElementById(`c-${category}`).innerText = counts[category];
-                                document.getElementById('proxyCount').innerText = masterSet.size;
-                            }
-                        } catch (err) {
-                            clearTimeout(timeoutId);
-                        } finally {
-                            completedSources++;
-                            let progressPercentage = (completedSources / totalSources) * 100;
-                            progressBar.style.width = `${progressPercentage}%`;
-                            statusText.innerText = `Extracting endpoints: ${completedSources} / ${totalSources} logs structuralized...`;
-                        }
-                    })()
-                );
-            }
-        }
-
-        await Promise.all(fetchPromises);
-
-        let rawArray = Array.from(masterSet);
-
-        // v10.0 Feature: Post-processing Structural Validation Check Matrix
-        if (runChecker && rawArray.length > 0) {
-            statusText.innerText = `Status: Running v10.0 structural verification sweep...`;
-            // Clears structurally corrupt or malformed entries dynamically
-            rawArray = rawArray.filter(proxy => {
-                if (proxy.includes('://')) return proxy.length > 15;
-                const port = proxy.split(':')[1];
-                return port && !isNaN(port) && parseInt(port) > 0;
+        try {
+            const response = await fetch('/api/scrape', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ choice: type, runChecker: runChecker })
             });
-        }
 
-        rawArray.sort((a, b) => {
-            const ipA = a.match(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\bfb/);
-            const ipB = b.match(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/);
-            if (ipA && ipB) {
-                const numA = ipA[0].split('.').map(Number);
-                const numB = ipB[0].split('.').map(Number);
-                for (let i = 0; i < 4; i++) {
-                    if (numA[i] !== numB[i]) return numA[i] - numB[i];
+            if (!response.ok) throw new Error('Vercel API Execution Timeout or Failure');
+            
+            const result = await response.json();
+            progressBar.style.width = '100%';
+            
+            globalProxyList = result.proxies;
+
+            for(const [cat, count] of Object.entries(result.breakdown)) {
+                if(document.getElementById(`c-${cat}`)) {
+                    document.getElementById(`c-${cat}`).innerText = count;
                 }
-                return 0;
             }
-            return a.localeCompare(b);
-        });
-        
-        globalProxyList = rawArray;
-        scrapeBtn.disabled = false;
-        setTimeout(() => { progressWrapper.style.display = 'none'; }, 500);
+            document.getElementById('proxyCount').innerText = result.retainedCount;
 
-        if (globalProxyList.length > 0) {
-            outputDisplay.value = globalProxyList.join('\n');
-            statusText.innerText = 'Status: Extraction complete. Live matrix deployed.';
-            document.getElementById('proxyCount').innerText = globalProxyList.length;
-            document.getElementById('searchContainer').style.display = 'block';
-            document.getElementById('copyBtn').disabled = false;
-            document.getElementById('downloadBtn').disabled = false;
-            document.getElementById('downloadJsonBtn').disabled = false;
-        } else {
-            appendToConsole('\n[!] NO PROXIES FOUND. Target lists completely unreachable.');
-            statusText.innerText = 'Status: Critical API handshake failure.';
+            if (globalProxyList.length > 0) {
+                outputDisplay.value = globalProxyList.join('\n');
+                statusText.innerText = `Status: Vercel execution complete (${result.timeTaken}s). Live matrix deployed.`;
+                document.getElementById('searchContainer').style.display = 'block';
+                document.getElementById('copyBtn').disabled = false;
+                document.getElementById('downloadBtn').disabled = false;
+                document.getElementById('downloadJsonBtn').disabled = false;
+                document.getElementById('downloadCsvBtn').disabled = false;
+            } else {
+                outputDisplay.value = '\n[!] NO PROXIES FOUND. Target lists completely unreachable.';
+                statusText.innerText = 'Status: Critical API handshake failure.';
+            }
+
+        } catch (error) {
+            outputDisplay.value = `\n[!] Fatal Exception: ${error.message}\nThe serverless function may have timed out. Try targeting a single protocol instead of 'ALL'.`;
+            statusText.innerText = 'Status: Serverless Function Failed.';
+        } finally {
+            scrapeBtn.disabled = false;
+            scrapeBtn.innerHTML = 'EXECUTE AUDIT';
+            setTimeout(() => { progressWrapper.style.display = 'none'; }, 1000);
         }
     }
 
@@ -649,49 +482,26 @@
     }
 
     function copyToClipboard() {
-        const display = document.getElementById('outputDisplay');
-        const text = display.value;
+        const text = document.getElementById('outputDisplay').value;
         if (!text || text.startsWith('[ No runtime')) return;
-        
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert(`Success: Proxies loaded into operating system clipboard.`);
-            }).catch(() => { runFallbackCopy(text); });
-        } else { runFallbackCopy(text); }
+        navigator.clipboard.writeText(text).then(() => {
+            alert(`Success: Proxies loaded into operating system clipboard.`);
+        });
     }
 
-    function runFallbackCopy(text) {
-        const dummyArea = document.createElement("textarea");
-        dummyArea.value = text;
-        dummyArea.style.position = "fixed"; 
-        dummyArea.style.left = "-9999px";
-        document.body.appendChild(dummyArea);
-        dummyArea.focus();
-        dummyArea.select();
-        try {
-            document.execCommand('copy');
-            alert(`Success: Proxies loaded via browser core backup hook.`);
-        } catch (err) {}
-        document.body.removeChild(dummyArea);
-    }
-
-    // v10.0 Feature: Detailed Precision Timestamp File Allocation Block (.txt)
     function downloadTXT() { 
-        const currentText = document.getElementById('outputDisplay').value;
-        if(!currentText || currentText.startsWith('[ No runtime')) return;
-        triggerDownload(new Blob([currentText], { type: 'text/plain;charset=utf-8' }), getTimestamp(), '.txt'); 
+        const text = document.getElementById('outputDisplay').value;
+        if(!text || text.startsWith('[ No runtime')) return;
+        triggerDownload(new Blob([text], { type: 'text/plain;charset=utf-8' }), getTimestamp(), '.txt'); 
     }
     
-    // v10.0 Feature: Comprehensive API Metadata Wrapper Core Layout (.json)
     function downloadJSON() { 
-        const currentText = document.getElementById('outputDisplay').value;
-        if(!currentText || currentText.startsWith('[ No runtime')) return;
-        const currentArray = currentText.split('\n');
+        const currentArray = document.getElementById('outputDisplay').value.split('\n');
+        if(!currentArray.length || currentArray[0].startsWith('[ No runtime')) return;
         const timestamp = getTimestamp();
-
         const jsonMetaExport = {
             metadata: {
-                engine_version: "10.0-WebClient",
+                engine_version: "10.0-Stateless",
                 scraped_at: timestamp,
                 structural_checked: document.getElementById('checkerToggle').checked,
                 total_proxies: currentArray.length
@@ -699,6 +509,16 @@
             proxies: currentArray
         };
         triggerDownload(new Blob([JSON.stringify(jsonMetaExport, null, 2)], { type: 'application/json;charset=utf-8' }), timestamp, '.json'); 
+    }
+
+    function downloadCSV() {
+        const currentArray = document.getElementById('outputDisplay').value.split('\n');
+        if(!currentArray.length || currentArray[0].startsWith('[ No runtime')) return;
+        let csvContent = "Proxy,Estimated_Protocol\n";
+        currentArray.forEach(p => {
+            csvContent += `${p},${p.includes("://") ? "v2ray/mtproto" : "http/socks"}\n`;
+        });
+        triggerDownload(new Blob([csvContent], { type: 'text/csv;charset=utf-8' }), getTimestamp(), '.csv');
     }
 
     function triggerDownload(blob, timestamp, extension) {
@@ -711,6 +531,5 @@
         setTimeout(() => { document.body.removeChild(anchor); window.URL.revokeObjectURL(anchor.href); }, 100);
     }
 </script>
-
 </body>
 </html>
